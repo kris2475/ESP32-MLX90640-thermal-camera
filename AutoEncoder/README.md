@@ -11,6 +11,24 @@ A high-performance, real-time machine learning edge-AI system that combines an *
 * **Anomaly Detection:** Monitors reconstruction Mean Squared Error (MSE) loss in real time against a set threshold to instantly flag thermal anomalies.
 
 ---
+## How Autoencoders Work for Thermal Anomaly Detection
+
+An **autoencoder** is an unsupervised artificial neural network designed to learn efficient representations (encodings) of data, typically for dimensionality reduction or anomaly detection. 
+
+Instead of predicting a target label, an autoencoder learns to **reconstruct its own input**. The network is split into two primary components:
+
+* **The Encoder:** Takes the high-dimensional input—such as the 768-pixel thermal grid from the MLX90640 sensor—and compresses it down into a much smaller, information-dense **latent space** (or bottleneck). In this project, the encoder squeezes 768 values into an 8-dimensional bottleneck, achieving a 96:1 compression ratio.
+* **The Decoder:** Takes that compressed 8-dimensional latent vector and attempts to reconstruct it back into the original 768-pixel thermal frame.
+
+---
+
+### Why Use an Autoencoder for Anomaly Detection?
+
+1. **Learning the Baseline ("Normal"):** During the training phase, the autoencoder is fed *only* normal, baseline thermal frames. Because the latent bottleneck is so small, the network cannot memorize every random detail; instead, it must learn the core, underlying patterns of the normal environment (e.g., typical room temperature distribution, standard background objects).
+2. **Reconstruction Error as an Alarm:** When the model is deployed in inference mode, it processes incoming live frames. If a normal frame passes through, the encoder and decoder easily reconstruct it, resulting in a **low Mean Squared Error (MSE)** loss.
+3. **Catching Anomalies:** If an unexpected thermal source enters the frame (like a hand, a heat leak, or a fault), the autoencoder—having never been trained on this pattern—struggles to reconstruct it accurately. This failure causes a sharp spike in the reconstruction MSE loss. Once the loss crosses the predefined threshold, the system instantly flags a thermal anomaly.
+
+---
 
 ## Hardware Requirements
 
